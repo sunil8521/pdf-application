@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from tkinter.messagebox import showinfo, showerror, askyesno
@@ -93,6 +92,11 @@ class PDFApplication:
         self.window.mainloop()
 
     def set_empty(self):
+        self.listbox.delete(0, tk.END)
+        self.display_label.config(text="")
+        self.entry_box.delete(0, 'end')
+        self.display_label1.config(text="")
+        self.entry_box1.delete(0, 'end')
         self.path = ''
         self.all = []
         self.path1 = ''
@@ -125,7 +129,7 @@ class PDFApplication:
                 except Exception as e:
                     messagebox.showerror('Task', 'Invalid file name. PDF file was not saved.')
             merged_pdf.close()
-            self.listbox.delete(0, tk.END)
+            
             self.set_empty()
 
     def select_encrypt_file(self):
@@ -138,7 +142,6 @@ class PDFApplication:
                 file_name1 = self.path.split('/')[-1]
                 if file_name1.lower().endswith('.pdf'):
                     self.display_label.config(text=file_name1)
-
         except:
             messagebox.showerror('Permission denied', 'Please Choose Another Folder!')
 
@@ -156,8 +159,6 @@ class PDFApplication:
                 with open(save_file1, 'wb') as f:
                     writer.write(f)
                 messagebox.showinfo("Status", "File saved Successfully")
-                self.display_label.config(text="")
-                self.entry_box.delete(0, 'end')
                 self.set_empty()
             else:
                 messagebox.showerror("Passwd Error", 'Entry box should be empty!')
@@ -184,22 +185,26 @@ class PDFApplication:
             page1 = a1.pages
             if self.entry_box1.get():
                 if a1.is_encrypted:
-                    a1.decrypt(self.entry_box1.get())
-                    for i in page1:
-                        writer1.add_page(i)
-                    save_file2 = filedialog.asksaveasfilename(defaultextension=".pdf",
-                                                              filetypes=(("PDF files", "*.pdf"), ("all files", "*.*")))
-                    with open(save_file2, 'wb') as f:
-                        writer1.write(f)
-                    messagebox.showinfo("Status", "File saved Successfully")
-                    self.display_label1.config(text="")
-                    self.entry_box1.delete(0, 'end')
-                    self.set_empty()
+                    try:
+                        a1.decrypt(self.entry_box1.get())
+                        for i in page1:
+                            writer1.add_page(i)
+                        save_file2 = filedialog.asksaveasfilename(defaultextension=".pdf",
+                                                                filetypes=(("PDF files", "*.pdf"), ("all files", "*.*")))
+                        try:
+                            with open(save_file2, 'wb') as f:
+                                writer1.write(f)
+                            messagebox.showinfo("Status", "File saved Successfully")
+                            self.set_empty()
+                        except:
+                            pass
+                    except:
+                        messagebox.showwarning("Warning", "Passward is Wrong!")
+                        self.entry_box1.delete(0, 'end')
                 else:
-                    messagebox.showwarning("Warning", "File is not an encrypted file")
-                    self.display_label1.config(text="")
-                    self.entry_box1.delete(0, 'end')
+                    messagebox.showwarning("Warning", "This File is not an Encrypted File")
                     self.set_empty()
+                    
             else:
                 messagebox.showerror("Passwd Error", 'Entry box should not be empty!')
         else:
@@ -208,7 +213,6 @@ class PDFApplication:
     def close_window(self):
         if askyesno(title='Close QR Code Generator-Detector', message='Are you sure you want to close the application?'):
             self.window.destroy()
-
 
 if __name__ == '__main__':
     PDFApplication()
